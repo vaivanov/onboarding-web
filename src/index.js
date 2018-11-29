@@ -5,7 +5,6 @@ import "assets/scss/material-kit-react.css?v=1.2.0";
 
 import Amplify from "aws-amplify";
 
-import CustomAuthenticator from "auth/CustomAuthenticator";
 import App from "App";
 
 Amplify.configure({
@@ -30,6 +29,6 @@ Amplify.configure({
 const rootEl = document.querySelector("#root");
 
 ReactDOM.render(
-    <App authenticator={CustomAuthenticator}/>,
+    <App />,
     rootEl
 );
