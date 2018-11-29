@@ -56,13 +56,15 @@ class Onboarding extends React.Component {
     render() {
         const {classes} = this.props;
         const {playground, map} = this.state;
-        var view = this.state.view === 'default' ?
+        console.log('Onboarding props: ', this.props);
+        console.log('Onboarding state: ', this.state);
+        const view = this.state.view === 'default' ?
             <div>
-            <PlaygroundStatistics playground={playground} />
-            <StartOrJoinInitiative playground={playground} />
+                <PlaygroundStatistics playground={playground}/>
+                <StartOrJoinInitiative playground={playground}/>
             </div>
-        :
-            <NewPlayground playground={playground} />;
+            :
+            <NewPlayground playground={playground}/>;
 
         return (
             <div className={"onboarding-wrapper"}>
