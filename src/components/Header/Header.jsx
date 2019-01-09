@@ -25,7 +25,6 @@ import JConfirmSignIn from "auth/JConfirmSignIn";
 import JForgotPassword from "auth/JForgotPassword";
 import JForgotPasswordReset from "auth/JForgotPasswordReset";
 import App1 from "../../index"; */
-import { Auth } from "aws-amplify";
 
 
 

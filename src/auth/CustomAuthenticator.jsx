@@ -8,13 +8,6 @@ import JConfirmSignUp from "./JConfirmSignUp";
 import { Authenticator } from 'aws-amplify-react';
 import { Redirect } from 'react-router';
 
-const AlwaysOn = (props) => {
-    return (
-        <div>
-            <Redirect to="/onboarding" />
-        </div>
-    )
-};
 
 const CustomAuthenticator = (props) => {
     console.log("CustomAuthenticator porps", props, props.changeMode);
