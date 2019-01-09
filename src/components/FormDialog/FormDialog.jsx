@@ -9,11 +9,12 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import componentsStyle from "assets/jss/material-kit-react/views/components.jsx";
 import withStyles from "@material-ui/core/styles/withStyles";
-import {withNamespaces} from "react-i18next";
+import { withNamespaces } from "react-i18next";
 import AddLocation from "@material-ui/icons/AddLocation";
 import PlaygroundMap from "../../views/Onboarding/Sections/PlaygroundMap";
 import gql from "graphql-tag";
-import {Mutation} from "react-apollo";
+import { Mutation } from "react-apollo";
+import { Auth } from "aws-amplify";
 
 const CREATE_INITIATIVE = gql`
     mutation CreateInitiative($input: CreateInitiativeInput!) {
@@ -30,7 +31,7 @@ class FormDialog extends React.Component {
             lat: "",
             lng: "",
             map: {
-                latlng: {lat: 52.092876, lng: 5.10448},
+                latlng: { lat: 52.092876, lng: 5.10448 },
                 zoom: 8
             },
             initiativeId: 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -43,15 +44,20 @@ class FormDialog extends React.Component {
             open: false,
             duplicate: false,
             error: '',
+            mode: "guest"
         }
+        Auth.currentSession()
+            .then(data => {
+                this.setState({mode: "authenticated"})
+            }).catch(err => console.log("Error occured ", err));
     };
 
     handleClickOpen = () => {
-        this.setState({open: true});
+        this.setState({ open: true });
     };
 
     handleClose = () => {
-        this.setState({open: false});
+        this.setState({ open: false });
     };
 
     updateName = (eEvent) => {
@@ -65,14 +71,14 @@ class FormDialog extends React.Component {
         window.location.href = `/workspace/${this.state.initiativeId}`;
     };
 
-    duplicateCheck = (playground) =>{
+    duplicateCheck = (playground) => {
         const playgroundList = this.props.playgrounds;
         if (playgroundList.filter(e => e.name === playground).length > 0) {
             this.setState({
                 duplicate: true,
                 error: 'Er bestaat al een speeltuin met deze naam.'
             });
-        } else{
+        } else {
             this.setState({
                 duplicate: false,
                 error: ''
@@ -86,7 +92,7 @@ class FormDialog extends React.Component {
         this.setState({
             playground: playground,
             map: {
-                latlng: {lat: playground.lat, lng: playground.lng},
+                latlng: { lat: playground.lat, lng: playground.lng },
                 zoom: 18
             }
         });
@@ -104,8 +110,8 @@ class FormDialog extends React.Component {
 
     render() {
 
-        const {classes} = this.props;
-        const {map, error} = this.state;
+        const { classes } = this.props;
+        const { map, error } = this.state;
         const playground = {
             name: this.state.name,
             lat: this.state.lat,
@@ -121,17 +127,17 @@ class FormDialog extends React.Component {
                     className={"btn btn-highlight pr-25"}
                     onClick={this.handleClickOpen}
                 >
-                    <AddLocation className={"mr-15"}/>
+                    <AddLocation className={"mr-15"} />
                     <span>Voeg een speeltuin toe</span>
                 </Button>
-                <Dialog
+                <Dialog mode={this.props.mode}
                     open={this.state.open}
                     onClose={this.handleClose}
                     aria-labelledby="form-dialog-title"
                     className={"FormDialog"}
                 >
                     <DialogTitle id="form-dialog-title">Voeg een speeltuin toe</DialogTitle>
-                    <DialogContent>
+                    <DialogContent mode={this.props.mode}>
                         <DialogContentText>
                             Je staat op het punt om een speeltuin toe te voegen. We willen alleen nog weten van je hoe
                             deze speeltuin heet.
@@ -151,11 +157,11 @@ class FormDialog extends React.Component {
                                 label="Hoe heet de speeltuin?"
                                 pattern="/^\w{4,}$/"
                                 onKeyUp={this.updateName}
-                                defaultValue={this.state.name}/>
+                                defaultValue={this.state.name} />
                         </form>
                         {error && <span className={"error alert"}>{error}</span>}
                     </DialogContent>
-                    <DialogActions className={"dialog-actions"}>
+                    <DialogActions className={"dialog-actions"} mode={this.props.mode}>
                         <Button onClick={this.handleClose} color="primary">
                             Annuleren
                         </Button>
@@ -163,11 +169,21 @@ class FormDialog extends React.Component {
                         <Mutation
                             mutation={CREATE_INITIATIVE}
                             update={this.loadWorkspace}
+                            mode={this.props.mode}
                         >
                             {(joinInitiative) => (
-                                <Button
-                                    onClick={() => joinInitiative({variables: {input: playground}})}
-                                    className={"btn btn-highlight" }
+                                <Button mode={this.props.mode}
+                                    onClick={() => {
+                                        console.log("Join Initiative ", this.props.mode);
+                                        if(this.state.mode === "authenticated") {
+                                            joinInitiative({ variables: { input: playground } })
+                                        } else {
+                                            this.props.history.push("/login");
+                                        }
+
+                                    }
+                                    }
+                                    className={"btn btn-highlight"}
                                     disabled={this.state.duplicate}
                                 >
                                     <span>Voeg een speeltuin toe</span>

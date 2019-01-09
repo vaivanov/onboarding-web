@@ -1,6 +1,6 @@
-import React, {Component} from 'react';
-import {Button, Input} from '@material-ui/core'
-import {Auth, JS, Logger} from 'aws-amplify';
+import React, { Component } from 'react';
+import { Button, Input } from '@material-ui/core'
+import { Auth, JS, Logger } from 'aws-amplify';
 
 const logger = new Logger('JSignIn');
 
@@ -16,28 +16,29 @@ export default class JSignIn extends Component {
         this.checkContact = this.checkContact.bind(this);
         this.changeState = this.changeState.bind(this);
         this.inputs = {};
-        this.state = {error: '', signInPage: true}
+        this.state = { error: '', signInPage: true }
     }
 
     changeState(state, data) {
-        const {onStateChange} = this.props;
+        const { onStateChange } = this.props;
         if (onStateChange) {
             onStateChange(state, data);
         }
     }
 
     signIn() {
-        const {username, password} = this.inputs;
+        const { username, password } = this.inputs;
         logger.info('sign in with ' + username);
-        Auth.signIn(username, password)
-            .then(user => this.signInSuccess(user))
-            .catch(err => this.signInError(err));
+        console.log('sign in with ' + username);
+        this.props.goForward(username,password);
+        setTimeout(() => this.props.history.push("/"), 1);
+        console.log("JSignIn signIn()");
     }
 
     signInSuccess(user) {
         logger.info('sign in success', user);
-        this.setState({error: ''});
-
+        this.setState({ error: '' });
+        //this.props.changeMode("authenticated");
         // There are other sign in challenges we don't cover here.
         // SMS_MFA, SOFTWARE_TOKEN_MFA, NEW_PASSWORD_REQUIRED, MFA_SETUP ...
         if (user.challengeName === 'SMS_MFA' || user.challengeName === 'SOFTWARE_TOKEN_MFA') {
@@ -54,7 +55,7 @@ export default class JSignIn extends Component {
             1) plain text message;
             2) object { code: ..., message: ..., name: ... }
         */
-        this.setState({error: err.message || err});
+        this.setState({ error: err.message || err });
     }
 
     checkContact(user) {
@@ -69,29 +70,29 @@ export default class JSignIn extends Component {
             });
     }
 
-    catchEnterSubmit(e){
-        if(e.keyCode === 13 && e.shiftKey === false) {
+    catchEnterSubmit(e) {
+        if (e.keyCode === 13 && e.shiftKey === false) {
             this.signIn();
         }
     }
 
     render() {
-        const {authState, authData} = this.props;
+        const { authState, authData } = this.props;
         if (!['signIn', 'signedOut', 'signedUp'].includes(authState)) {
             return null;
         }
 
         const style = {
             width: '20rem',
-            input: {borderRadius: '0', display: 'block'},
-            links: {fontSize: '0.9em', minHeight: "25px"},
-            button: {width: '100%', marginBottom: "15px"},
-            extraButton: {border: "0", marginBottom: "15px", cursor: "pointer"},
-            left: {float: "left"},
-            alert: {fontSize: '0.8em'}
+            input: { borderRadius: '0', display: 'block' },
+            links: { fontSize: '0.9em', minHeight: "25px" },
+            button: { width: '100%', marginBottom: "15px" },
+            extraButton: { border: "0", marginBottom: "15px", cursor: "pointer" },
+            left: { float: "left" },
+            alert: { fontSize: '0.8em' }
         };
 
-        const {error} = this.state;
+        const { error } = this.state;
 
         return (
             <div className={"secure-app-wrapper"}>
@@ -126,25 +127,25 @@ export default class JSignIn extends Component {
                                 Sign In
                             </Button>
                         </form>
-                            <div style={style.links} className={"extra-info"}>
-                                <div style={style.left}>
-                                    <button
-                                        style={style.extraButton}
-                                        onClick={() => this.changeState('signUp')}
-                                    >
-                                        Maak een account
+                        <div style={style.links} className={"extra-info"}>
+                            <div style={style.left}>
+                                <button
+                                    style={style.extraButton}
+                                    onClick={() => this.changeState('signUp')}
+                                >
+                                    Maak een account
                                     </button>
-                                </div>
-                                <div style={style.left}>
-                                    <button style={style.extraButton}
-                                            onClick={() => this.changeState('forgotPassword')}
-                                    >
-                                        Wachtwoord vergeten?
-                                    </button>
-                                </div>
                             </div>
-                            {/*<Federated federated={federated_data} onStateChange={this.changeState} />*/}
-                            {error && <div style={style.alert}>{error}</div>}
+                            <div style={style.left}>
+                                <button style={style.extraButton}
+                                    onClick={() => this.changeState('forgotPassword')}
+                                >
+                                    Wachtwoord vergeten?
+                                    </button>
+                            </div>
+                        </div>
+                        {/*<Federated federated={federated_data} onStateChange={this.changeState} />*/}
+                        {error && <div style={style.alert}>{error}</div>}
 
                     </div>
                 </div>

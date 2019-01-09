@@ -20,7 +20,7 @@ import PlaygroundMap from "./Sections/PlaygroundMap";
 import PlaygroundStatistics from "./Sections/PlaygroundStatistics";
 import CallToAction from "./Sections/CallToAction";
 import gql from "graphql-tag";
-import {graphql} from "react-apollo";
+import { graphql } from "react-apollo";
 
 const GET_PLAYGROUNDS = gql`
   {
@@ -37,9 +37,10 @@ const GET_PLAYGROUNDS = gql`
 `;
 
 const withPlaygrounds = graphql(GET_PLAYGROUNDS, {
-    props: ({ownProps, data}) => {
-        if (data.loading) return {playgroundsLoading: true};
-        if(data.error) return {
+    props: ({ ownProps, data }) => {
+        console.log("GET_PLAYGROUNDS " , ownProps , " Data: ", data);
+        if (data.loading) return { playgroundsLoading: true };
+        if (data.error) return {
             hasErrors: true,
             error: data.error.toString()
         };
@@ -62,6 +63,7 @@ const withPlaygrounds = graphql(GET_PLAYGROUNDS, {
 class Onboarding extends React.Component {
     constructor(props) {
         super(props);
+        console.log("Onboarding props:" + {...props});
         this.handlePlaygroundChange = this.handlePlaygroundChange.bind(this);
         const { t } = this.props;
         this.state = {
@@ -70,54 +72,79 @@ class Onboarding extends React.Component {
                 name: t("playground.default.area")
             },
             map: {
-                latlng: {lat: 52.092876, lng: 5.10448},
+                latlng: { lat: 52.092876, lng: 5.10448 },
                 zoom: 8
             },
             view: 'default'
+
         };
+    }
+
+    componentWillMount() {
+        console.log("Onboarding component will mount");
+    }
+
+    componentDidMount() {
+        console.log("Onboarding component did mount");
+    }
+
+    componentWillUpdate() {
+        console.log("Onboarding component will Update");
+    }
+    componentDidUpdate() {
+        console.log("Onboarding component Did update");
     }
 
 
     handlePlaygroundChange(playground) {
+        console.log("handlePlaygroundChange");
         this.setState({
             view: 'default',
             playground: playground,
             map: {
-                latlng: {lat: playground.lat, lng: playground.lng},
+                latlng: { lat: playground.lat, lng: playground.lng },
                 zoom: playground.zoom
             }
         });
     }
 
     render() {
-        const {playgrounds, classes, ...rest } = this.props;
-        const {playground, map} = this.state;
-
+        const { playgrounds, classes, ...rest } = this.props;
+        const { playground, map } = this.state;
+        console.log("Onboarding autheticattedUser ", this.props.authenticatedUser);
+        console.log("Onboarding authData ", this.props.authData);
         return (
             <div className={"onboarding-wrapper"}>
 
                 <Header
                     brand={"Rookvrije generatie"}
-                    rightLinks={<HeaderLinks/>}
+                    rightLinks={<HeaderLinks  {...this.props}/>}
                     fixed
                     color="white"
                     changeColorOnScroll={{
                         height: 50,
                         color: "white"
                     }}
+                    {...this.state}
                     {...rest}
+                    goBack={this.props.goBack}
+                    goForward={this.props.goForward}
+                    status={this.props.status}
+                    mode={this.props.mode}
                 />
 
-               <Parallax image={require("assets/img/backgrounds/bg-zand.jpg")} className={"parralax onboarding"} >
+              
+
+                <Parallax image={require("assets/img/backgrounds/bg-zand.jpg")} className={"parralax onboarding"} >
                     <div className={classes.container + " onboarding-header"}>
-                        <CallToAction playground={playground}/>
+                        <CallToAction playground={playground} />
                     </div>
                 </Parallax>
 
                 <div className={classNames(classes.main, classes.mainRaised) + " onboarding-container"}>
-                    <GridContainer className={"grid-container"}>
+                    <GridContainer className={"grid-container"} mode={this.props.mode}>
                         <GridItem xs={12} sm={12} md={6} className={"playground-map-container"}>
-                            <PlaygroundSearch onPlaygroundChange={this.handlePlaygroundChange} playgrounds={playgrounds}/>
+                            <PlaygroundSearch onPlaygroundChange={this.handlePlaygroundChange} playgrounds={playgrounds} />
                             <PlaygroundMap
                                 isMarkerShown
                                 viewOnly={true}
@@ -133,6 +160,7 @@ class Onboarding extends React.Component {
                                     playground={playground}
                                     onBackButton={this.handlePlaygroundChange}
                                     defaultView={playground.default}
+                                    {...this.props}
                                 />
                             </div>
                         </GridItem>

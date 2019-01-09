@@ -130,7 +130,7 @@ class CustomDropdown extends React.Component {
                         {dropdownHeader}
                       </MenuItem>
                     ) : null}
-                    {dropdownList.map((prop, key) => {
+                    {  dropdownList.map((prop, key) => {
                       if (prop.divider) {
                         return (
                           <Divider

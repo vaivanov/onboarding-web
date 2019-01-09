@@ -46,7 +46,7 @@ const withPlaygroundProgress = graphql(GET_SMOKEFREE_PROGRESS, {
             error: data.error.toString()
         };
 
-        console.log(data.progress);
+        console.log("withPlaygroundProgress " ,data.progress);
         return {
             progress: data.progress
         };
@@ -80,8 +80,8 @@ class PlaygroundStatistics extends React.Component {
                         {playground.name}
                     </h2>
                     <div>
-                        <GridContainer>
-                            <GridItem xs={12} sm={12} md={8} lg={6} className="grid-item">
+                        <GridContainer mode={this.props.mode}>
+                            <GridItem xs={12} sm={12} md={8} lg={6} className="grid-item" mode={this.props.mode}>
                                 <p className="explainer">
                                     {
                                         generalStatistics ?
@@ -111,7 +111,7 @@ class PlaygroundStatistics extends React.Component {
                                     <PlaygroundStatistic playground={playground} name={playground.name} stat={"votes"}/>
                                 </div>
                                 <div style={{display: generalStatistics ? 'block' : 'none'}}>
-                                    <FormDialog playgrounds={playgrounds}/>
+                                    <FormDialog playgrounds={playgrounds} {...this.props}/>
                                 </div>
                                 <div style={{display: generalStatistics ? 'none' : 'block'}}>
                                     <JoinInitiative playground={playground}/>

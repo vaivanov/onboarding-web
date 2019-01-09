@@ -11,9 +11,15 @@ export default class JSignOut extends Component {
   }
 
   signOut() {
+    
     Auth.signOut()
-      .then(() => logger.info('sign out success'))
-      .catch(err => logger.info('sign out error', err));
+      .then(() =>  {
+        logger.info('sign out success');
+        this.props.history.push("/");
+      })
+      .catch(err => {
+        this.props.history.push("/");
+        logger.info('sign out error', err)});
   }
 
   render() {

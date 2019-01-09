@@ -1,29 +1,24 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Redirect } from 'react-router-dom'
-import {createBrowserHistory} from "history";
-import {Route, Router, Switch} from "react-router-dom";
-import {I18nextProvider} from "react-i18next";
+import { createBrowserHistory } from "history";
+import { Route,  Router, withRouter, Switch } from "react-router-dom";
+import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n";
-import {ApolloClient} from 'apollo-client';
-import {HttpLink} from 'apollo-link-http';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import {ApolloProvider} from 'react-apollo';
-import {setContext} from "apollo-link-context";
+import { ApolloClient } from 'apollo-client';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ApolloProvider } from 'react-apollo';
+import { setContext } from "apollo-link-context";
+import WorkSpace from '../src/views/Workspace/Workspace';
 
-import indexRoutes from "routes/index.jsx";
 import "assets/scss/material-kit-react.css?v=1.2.0";
 
 import Amplify from "aws-amplify";
-import {withAuthenticator} from 'aws-amplify-react';
 
-import JSignUp from "auth/JSignUp";
-import JSignIn from "auth/JSignIn";
-import JConfirmSignUp from "auth/JConfirmSignUp";
-import JConfirmSignIn from "auth/JConfirmSignIn";
-import JForgotPassword from "./auth/JForgotPassword";
-import JForgotPasswordReset from "./auth/JForgotPasswordReset";
-
+import CustomAuthenticator from "./auth/CustomAuthenticator";
+import Onboarding from "./views/Onboarding/Onboarding";
+import { Auth } from "aws-amplify";
 
 const environments = {
     "techoverflow-ta.aws.abnamro.org": {
@@ -60,11 +55,11 @@ const environments = {
         aws: {
             cognito: {
                 region: "eu-west-1",
-                userPoolId: "eu-west-1_WsTxYUHyC",
-                userPoolWebClientId: "3nkh1qomocr39s893jf0dp44cd",
-                domain: "smokefree-dev.auth.eu-west-1.amazoncognito.com",
-                redirectSignIn: "http://localhost:3000/onboarding/signin",
-                redirectSignOut: "http://localhost:3000/onboarding/logout",
+                userPoolId: "eu-west-1_oJjS9ieId",
+                userPoolWebClientId: "61arbvommi7m6bishhq4jlrbd",
+                domain: "techoverflow-d.auth.eu-west-1.amazoncognito.com",
+                redirectSignIn: "https://techoverflow-d.aws.nl.eu.abnamro.com/onboarding/signin",
+                redirectSignOut: "https://techoverflow-d.aws.nl.eu.abnamro.com/onboarding/logout",
             }
         },
         api: {
@@ -104,24 +99,140 @@ Amplify.configure({
 let hist = createBrowserHistory();
 const rootEl = document.querySelector("#root");
 
-const App = class App extends React.Component {
+class App1 extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            authenticatedUser: null,
+            authData: null,
+            mode: 'guest', // guest or authencated
+            status: "guest",
+            user: null
+            //client: this._unauthenticated_client()
+
+        };
+    }
+
+    signInHandler = (username, password) => {
+        console.log("App1 button is clicked ");
+        Auth.signIn(username, password)
+            .then(user => {
+                console.log("Auth.signIn is success ", user);
+                this.setState({user: user, authenticatedUser: user, authData: user.signInUserSession,status: "authenticated" ,mode: "authenticated"});
+                //this.updateAuthenticatedUserandSession();
+                //setTimeout(() => console.log("Done"), 3000);
+                console.log("App1 signInHandler()");
+                this.hist.push("/");
+                
+            })
+            .catch(err => {/* this.signInError(err) */}); 
+        
+    }
+
+    signOutHandler = () => {
+        console.log("Clicked on Logout");
+        this.setState({ status: "guest" });
+    }
+
+    updateAuthenticatedUserandSession = () => {
+        console.log("updateAuthenticatedUserandSession");
+        if(this.state.authenticatedUser == null || this.state.authData) {
+            Auth.currentAuthenticatedUser().then(user => {
+
+                console.log('updateAuthenticatedUserandSession Auth.currentAuthenticatedUser():' + user);
+                this.setState({
+                    authenticatedUser: user,
+                    //client: this._authenticated_client(user)
+                })
+            });
+            Auth.currentSession()
+            .then(data => {
+                console.log("updateAuthenticatedUserandSession Auth.currentSession:" + JSON.stringify(data));
+                this.setState({
+                    authData: data
+                });
+            });
+        }
+       
+    }
+    
+
+    componentWillMount() {
+        console.log("App1 component will mount");
+        if(this.state.authenticatedUser == null || this.state.authData == null) {
+            Auth.currentAuthenticatedUser().then(user => {
+
+                //console.log('Auth.currentAuthenticatedUser():' + user);
+                this.setState({
+                    authenticatedUser: user,
+                    mode: 'authenticated',
+                    //client: this._authenticated_client(user)
+                })
+            });
+    
+            Auth.currentSession()
+                .then(data => {
+                    //console.log("Auth.currentSession:" + JSON.stringify(data));
+                    this.setState({
+                        authData: data
+                    });
+                });
+        }
+    }
+
+    componentWillUpdate() {
+        console.log("App1 component will update");
+        if(this.state.authenticatedUser == null || this.state.authData == null) {
+            Auth.currentAuthenticatedUser().then(user => {
+
+                //console.log('Auth.currentAuthenticatedUser():' + user);
+                this.setState({
+                    authenticatedUser: user,
+                    mode: 'authenticated',
+                    //client: this._authenticated_client(user)
+                })
+            });
+    
+            Auth.currentSession()
+                .then(data => {
+                    //console.log("Auth.currentSession:" + JSON.stringify(data));
+                    this.setState({
+                        authData: data
+                    });
+                });
+        }
+        
+        
+    }
+
+    componentDidUpdate() {
+        console.log("App1 component Did update");
+    }
+
+    componentDidMount() {
+        console.log("App1 component Did mount");
+    }
+
+    
+
     render() {
-        const {auth, authData} = this.props;
-        console.log('Auth: ', auth);
-        console.log('Auth data: ', authData);
-        if (!authData) {
-            return "Logging in failed: " + (auth && auth.state);
+        //const {auth, authData} = this.stat;
+        console.log('App1 State Auth: ', this.state);
+        if (!this.state.authData) {
+            //return "Logging in failed: " + (auth && auth.state);
         }
 
-        const httpLink = new HttpLink({uri: uri});
-        const authLink = setContext(async (req, {headers}) => {
-            let session = authData.getSignInUserSession();
-            let idToken = session.getIdToken();
-            let jwtToken = idToken.getJwtToken();
+        const httpLink = new HttpLink({ uri: uri });
+        const authLink = setContext(async (req, { headers }) => {
+           
+            let jwtToken = this.state.authData && this.state.authData.idToken.jwtToken;
+            let bearer = 'Bearer ' + jwtToken;
+
             return {
                 ...headers,
                 headers: {
-                    Authorization: `Bearer ${jwtToken}`
+                    Authorization: bearer
                 },
             };
         });
@@ -131,19 +242,79 @@ const App = class App extends React.Component {
             cache: new InMemoryCache(),
         });
 
+        const childProps = {
+            isAuthenticated: this.state.authenticatedUser !== null ? true : false,
+            authenticatedUser: this.state.authenticatedUser
+        };
+
         return (
             <div>
                 <ApolloProvider client={client}>
                     <I18nextProvider i18n={i18n}>
                         <Router history={hist}>
                             <Switch>
-                                <Route exact path="/onboarding/logout" render={() => {
-                                    console.log("User logged out, redirecting to map of the Netherlands.");
-                                    return <Redirect to='/' />
-                                }}/>
-                                {indexRoutes.map((prop, key) => {
-                                    return <Route path={prop.path} key={key} component={prop.component} />;
-                                })}
+                                {/* <Route
+                                    path="/button"
+                                    render={() => <div>
+                                        <button onClick={this.signInHandler} >
+                                            Sign In
+                                                        </button>
+                                        <button onClick={this.signOutHandler} >
+                                            Log out
+                                                        </button>{this.state.status}
+                                    </div>}
+                                /> */}
+
+                                <Route
+                                    exact
+                                    path="/onboarding/logout"
+                                    render={() => {
+                                        console.log("User logged out, redirecting to map of the Netherlands.");
+                                        return <Redirect to='/' />
+                                    }
+                                    }
+                                />
+
+                                <Route
+                                    path="/login"
+                                    exact
+                                    key="Login"
+                                    render={props => <CustomAuthenticator
+                                        {...props}
+                                        {...childProps}
+                                        {...this.state}
+                                        goForward={this.signInHandler}
+                                        goBack={this.signOutHandler}>
+                                    </CustomAuthenticator>
+                                    }
+                                />
+                                 <Route
+                                    path="/workspace"
+                                    key="Workspace"
+                                    render={(props) => <WorkSpace
+                                        {...props}
+                                        {...this.state}
+                                        {...childProps}
+                                        goForward={this.signInHandler}
+                                        goBack={this.signOutHandler}
+                                        Auth={Auth}
+                                    />
+                                    }
+                                />
+                                <Route
+                                    path="/"
+                                    exact
+                                    key="Onboarding"
+                                    render={(props) => <Onboarding
+                                        {...props}
+                                        {...this.state}
+                                        {...childProps}
+                                        goForward={this.signInHandler}
+                                        goBack={this.signOutHandler}
+                                        Auth={Auth}
+                                    />
+                                    }
+                                />
                             </Switch>
                         </Router>
                     </I18nextProvider>
@@ -153,20 +324,11 @@ const App = class App extends React.Component {
     }
 };
 
-const SecuredApp = withAuthenticator(App, false, [
-    <JSignIn/>,
-    <JSignUp/>,
-    <JForgotPassword/>,
-    <JForgotPasswordReset/>,
-    <JConfirmSignIn/>,
-    <JConfirmSignUp/>,
-]);
 
-const Wrapped = [
-    <SecuredApp className={"secure-app"}/>
-];
 
 ReactDOM.render(
-    Wrapped,
+    <App1 />,
     rootEl
 );
+
+export default withRouter(App1);

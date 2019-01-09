@@ -44,8 +44,10 @@ class JoinInitiative extends React.Component {
                     <div>
                         <Button
                             className={"btn btn-highlight pr-25 pull-left"}
-                            onClick={(/*event*/) =>
-                                joinInitiative({variables: {input: initiativeInput}})
+                            onClick={(/*event*/) => {
+                                console.log("Is user is logged in");
+                                joinInitiative({variables: {input: initiativeInput}});
+                            }
                             }
                         >
                             <PersonAdd className={"mr-5"}/>
