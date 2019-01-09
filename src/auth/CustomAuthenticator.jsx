@@ -6,7 +6,6 @@ import JForgotPasswordReset from "./JForgotPasswordReset";
 import JConfirmSignIn from "./JConfirmSignIn";
 import JConfirmSignUp from "./JConfirmSignUp";
 import { Authenticator } from 'aws-amplify-react';
-import { Redirect } from 'react-router';
 
 
 const CustomAuthenticator = (props) => {
