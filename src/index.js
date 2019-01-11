@@ -26,6 +26,7 @@ import JForgotPasswordReset from "./auth/JForgotPasswordReset";
 
 import CookieConsent from "react-cookie-consent";
 
+import AWS from 'aws-sdk';
 
 const environments = {
     "techoverflow-ta.aws.abnamro.org": {
@@ -62,9 +63,9 @@ const environments = {
         aws: {
             cognito: {
                 region: "eu-west-1",
-                userPoolId: "eu-west-1_WsTxYUHyC",
-                userPoolWebClientId: "3nkh1qomocr39s893jf0dp44cd",
-                domain: "smokefree-dev.auth.eu-west-1.amazoncognito.com",
+                userPoolId: "eu-west-1_oJjS9ieId",
+                userPoolWebClientId: "61arbvommi7m6bishhq4jlrbd",
+                domain: "techoverflow-d.auth.eu-west-1.amazoncognito.com",
                 redirectSignIn: "http://localhost:3000/onboarding/signin",
                 redirectSignOut: "http://localhost:3000/onboarding/logout",
             }
@@ -106,6 +107,68 @@ Amplify.configure({
 let hist = createBrowserHistory();
 const rootEl = document.querySelector("#root");
 
+function isAttributeExist(attribute, value) {
+
+    let _filterString = null;
+    let  cognitoPromise = null;
+
+    AWS.config.update({
+        region: settings.aws.cognito.region, credentials: {
+            'accessKeyId': "ASIA3PQN5P5I3DWSUP2D",
+            'secretAccessKey': "t+DRiuR+d6hGgssu8mDznTQEfqMHSo3VS6CPyHPT", "sessionToken": "FQoGZXIvYXdzEFAaDDje/rSR8UkTAWvZRyLLAiyEQh+HJile7gcwi0vcHF8Y+FZ2VcQFM3gVfiHOOmfZLZbu3gr6up5Z5/UlPCZq8mh73AOgkOK+fSvtpeNqYoJkZZ3tfmzB5MWnwYUqlZ/GyIT92gcNMao0MVMDcDaBPKVIWmDAbkDdRcixrlB3mjT1DL3nhOEhM6wpEOvNZWrTPZHnp2UB9e935fV1bxCDIEZ2ToCn2ChAVRp4E81z669opp2QcyI/g/gYCvZEoob4YMfdYf5PxPYk3HjuQQxS37lCrdNWbRnlshICm90NAVSauS16c3FUqlX9dzvCcMSio9AePOENZrgQOefDD5kGJBUbXhi8dTFwOViGOJrGajyLmNrGKIesiqBVqm/9VK6GCAn2604+3dK3rQT1oZ9vlKOUZyzJR1yktnXLI9oWf4zfag5VcJ+87QaS1zvvPZ4aGIeL+H/5ryl9JYYo8rnd4QU="
+        }
+    });
+
+    const cognitoidentityserviceprovider =
+        new AWS.CognitoIdentityServiceProvider(
+            { region: settings.aws.cognito.region, apiVersion: '2016-04-18' });
+
+    switch (attribute) {
+        case "email":
+            _filterString = attribute + "=\"" + value + "\"";
+            const emailParams = {
+                UserPoolId: settings.aws.cognito.userPoolId, /* required */
+                AttributesToGet: [
+                    attribute
+                ],
+                Filter: _filterString
+            };
+            cognitoPromise = new Promise((resolve, reject) => {
+
+                cognitoidentityserviceprovider.listUsers(emailParams, (err, data) => {
+                    if (err) {
+                        reject(false)
+                    }
+                    else {
+                        resolve(data.Users.length !== 0 ? true : false);
+                    }
+                })
+            });
+            break;
+        case "username":
+            const usernameParams = {
+                UserPoolId: settings.aws.cognito.userPoolId, /* required */
+                Username: value
+            };
+            cognitoPromise = new Promise((resolve, reject) => {
+
+                cognitoidentityserviceprovider.adminGetUser(usernameParams, (err, data) => {
+                    if (err) {
+                        resolve(false)
+                    }
+                    else {
+                        resolve(true);
+                    }
+                })
+            });
+            break;
+        default:
+            cognitoPromise = null;
+    }
+
+    return cognitoPromise;
+
+}
 const App = class App extends React.Component {
     render() {
         const {auth, authData} = this.props;
@@ -144,7 +207,7 @@ const App = class App extends React.Component {
                                     return <Redirect to='/'/>
                                 }}/>
                                 {indexRoutes.map((prop, key) => {
-                                    return <Route path={prop.path} key={key} component={prop.component}/>;
+                                    return <Route path={prop.path} key={key} component={prop.component} listUsers={this.listUsers} />;
                                 })}
                             </Switch>
                         </Router>
@@ -159,8 +222,8 @@ const App = class App extends React.Component {
                     expires={150}
                 >
                     Deze website gebruikt cookies om te kunnen functioneren.{" "}
-                        <span style={{fontSize: "10px"}}>
-                            Door gebruik te maken van de site stemt u in met het plaatsen van dergelijke cookies
+                    <span style={{fontSize: "10px"}}>
+                        Door gebruik te maken van de site stemt u in met het plaatsen van dergelijke cookies
                         </span>
                 </CookieConsent>
             </div>
@@ -170,7 +233,7 @@ const App = class App extends React.Component {
 
 const SecuredApp = withAuthenticator(App, false, [
     <JSignIn/>,
-    <JSignUp/>,
+    <JSignUp isAttributeExist={isAttributeExist} />,
     <JForgotPassword/>,
     <JForgotPasswordReset/>,
     <JConfirmSignIn/>,
@@ -185,3 +248,5 @@ ReactDOM.render(
     Wrapped,
     rootEl
 );
+
+export { isAttributeExist };

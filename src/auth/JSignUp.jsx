@@ -3,7 +3,6 @@ import {Button, Input} from '@material-ui/core'
 import {Auth, Logger} from 'aws-amplify';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-
 const logger = new Logger('JSignUp');
 
 /**
@@ -18,7 +17,7 @@ export default class JSignUp extends Component {
         this.changeState = this.changeState.bind(this);
         this.inputs = {};
         this.state = {
-            error: '',
+            error: new Map(),
             acceptedTerms: false,
             filledPass: false,
             filledUsername: false,
@@ -44,31 +43,44 @@ export default class JSignUp extends Component {
     signUp() {
         const {username, password, email, phone_number} = this.inputs;
         logger.info('sign up with ' + username);
-        Auth.signUp(username, password, email, phone_number)
-            .then(() => this.signUpSuccess(username))
-            .catch(err => this.signUpError(err));
+        this.props.isAttributeExist("email", email).then((newEmail) => {
+            logger.info('sign up with ' + username, password, email, phone_number, newEmail);
+            Auth.signUp(username, password, email, phone_number)
+             .then(() => this.signUpSuccess(username))
+             .catch(err => this.signUpError(err));
+        }) 
     }
 
     signUpSuccess(username) {
         logger.info('sign up success with ' + username);
-        this.setState({error: ''});
+        //this.setState({error: ''});
 
         this.changeState('confirmSignUp', username);
     }
 
     signUpError(err) {
         logger.info('sign up error', err);
+        let errors = this.state.error;
         let message = err.message || err;
-        if (message.includes("password")) {
+        if (message.includes("password") || message.includes("Password")) {
             message = 'Je wachtwoord heeft minimaal 6 karakters en 1 cijfer nodig.';
+            errors.set("cognito_password",message);
+        } else if(message.includes("email")) {
+            message = 'Ongeldige e-mailadresindeling';
+            errors.set("cognito_email",message);
+        } else if(message.includes("username")){
+            message = 'Ongeldige gebruikersnaamindeling';
+            errors.set("cognito_username",message);
         }
-        this.setState({error: message});
+        this.setState({error: errors});
     }
 
     isFilled() {
         const {filledUsername, filledPass, filledEmail, acceptedTerms} = this.state;
         if (filledUsername && filledPass && filledEmail && acceptedTerms) {
-            this.setState({filled: true});
+            if(this.state.error.size === 0) {
+                this.setState({filled: true});
+            }
         } else {
             this.setState({filled: false});
         }
@@ -78,6 +90,21 @@ export default class JSignUp extends Component {
         switch (field) {
             case "username":
                 this.inputs.username = event;
+                this.props.isAttributeExist("username", this.inputs.username)
+                    .then((isExist) => {
+                        let errors = this.state.error;
+                        if(isExist) {
+                            errors.set("username","Username is already exist")
+                            errors.delete("cognito_username");
+                        } else {
+                            errors.delete("username")
+                        }
+                        isExist ? this.setState({ filledEmail: false, error: errors}, () => {
+                            this.isFilled();
+                        }) : this.setState({ filledEmail: true, error: errors}, () => {
+                            this.isFilled();
+                        })
+                    });
                 this.inputs.username !== "" ?
                     this.setState({filledUsername: true}, () => {
                         this.isFilled();
@@ -88,6 +115,8 @@ export default class JSignUp extends Component {
                 break;
             case "password":
                 this.inputs.password = event;
+                let errors = this.state.error;
+                errors.delete("cognito_password");
                 this.inputs.password !== "" ?
                     this.setState({filledPass: true}, () => {
                         this.isFilled();
@@ -98,11 +127,20 @@ export default class JSignUp extends Component {
                 break;
             case "email":
                 this.inputs.email = event;
-                this.inputs.email !== "" ? this.setState({filledEmail: true}, () => {
-                        this.isFilled();
-                    }) :
-                    this.setState({filledEmail: false}, () => {
-                        this.isFilled();
+                this.props.isAttributeExist("email", this.inputs.email)
+                    .then((isExist) => {
+                        let errors = this.state.error;
+                        if(isExist) {
+                            errors.set("email","Email is already exist")
+                            errors.delete("cognito_email");
+                        } else {
+                            errors.delete("email");
+                        }
+                        isExist ? this.setState({ filledEmail: false, error: errors}, () => {
+                            this.isFilled();
+                        }) : this.setState({ filledEmail: true, error: errors }, () => {
+                            this.isFilled();
+                        })
                     });
                 break;
             default:
@@ -132,8 +170,6 @@ export default class JSignUp extends Component {
             left: {float: "left"},
             alert: {fontSize: '0.8em'}
         };
-
-        const {error} = this.state;
 
 
         return (
@@ -207,7 +243,13 @@ export default class JSignUp extends Component {
                                 </Button>
                             </div>
                         </form>
-                        {error && <p className={"error"}>{error}</p>}
+                        {this.state.error.length !== 0 &&
+                                    <ul className={"error"}>
+                                        { Array.from(this.state.error).map( (err, index) => {
+                                            return <li key={index}> {err[1]}</li>
+                                        })}
+                                    </ul>
+                        }
                         <div style={style.links} className={"extra-info"}>
                             <div style={style.left}>
                                 <button
