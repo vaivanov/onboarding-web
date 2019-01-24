@@ -11,13 +11,13 @@ import SimpleCard from "components/CustomCard/Card.jsx"
 import CollapseCard from "components/CustomCard/CollapseCard.jsx"
 
 import componentsStyle from "assets/jss/material-kit-react/views/components.jsx";
-import {Mutation} from "react-apollo";
-import gql from "graphql-tag";
+/* import {Mutation} from "react-apollo";
+import gql from "graphql-tag"; */
 import PlaygroundManagers from "./PlaygroundManagers";
 import PlaygroundVotes from "../Cards/PlaygroundVotes";
 
-import Amplify from "aws-amplify";
-import PlaygroundChatBox from "../../../components/Chatbox/PlaygroundChatBox";
+/* import Amplify from "aws-amplify";ß
+import PlaygroundChatBox from "../../../components/Chatbox/PlaygroundChatBox"; */
 import AlertDialog from "../../AlertDialog.jsx";
 import { connect } from 'react-redux'
 import { createLoadingSelector, createErrorMessageSelector } from '../../../api/Selectors';

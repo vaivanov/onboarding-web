@@ -1,6 +1,6 @@
 import { GET_PLAYGROUNDS, CREATE_INITIATIVE, GET_PLAYGROUND_DETAILS, JOIN_INITIATIVE, CLAIM_MANAGER_ROLE } from "./PlaygroundActions";
 import { SUCCESS_POSTFIX } from "../../GlobalActions";
-import { getUserProfile } from "../UserProfile/UserProfileReducer";
+/* import { getUserProfile } from "../UserProfile/UserProfileReducer"; */
 
 
 // State definition
