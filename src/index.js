@@ -49,17 +49,7 @@ REACT_APP_PARAM1 = reactappparam1
 REACT_APP_PARAM2 = reactappparam2 */
 console.log("NODE_ENV " , process.env.NODE_ENV);
 
-console.log("REACT_APP_SECRET_CODE " , process.env.REACT_APP_SECRET_CODE);
-
-console.log("NODE_PARAM1 ", process.env.NODE_PARAM1);
-console.log("NODE_PARAM2 ", process.env.NODE_PARAM2);
-console.log("REACT_APP_PARAM1 ", process.env.REACT_APP_PARAM1);
-console.log("REACT_APP_PARAM2 ", process.env.REACT_APP_PARAM2);
-console.log("ONBOARDING_API ", process.env.ONBOARDING_API);
-console.log("REACT_APP_ONBOARDING_API ", process.env.REACT_APP_ONBOARDING_API);
-console.log("REACT_APP_MY_PORT ", process.env.REACT_APP_MY_PORT);
-
-console.log("process.env ", process.env)
+console.log("process.env =======> ", process.env)
 
 
 // IsAuthenticated can be called to see if user is authenticated
