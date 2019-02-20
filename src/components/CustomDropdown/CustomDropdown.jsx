@@ -51,6 +51,7 @@ class CustomDropdown extends React.Component {
       rtlActive,
       noLiPadding
     } = this.props;
+    console.log("dropdownList....................." , dropdownList);
     const caretClasses = classNames({
       [classes.caret]: true,
       [classes.caretActive]: open,
@@ -130,7 +131,7 @@ class CustomDropdown extends React.Component {
                         {dropdownHeader}
                       </MenuItem>
                     ) : null}
-                    {  dropdownList.map((prop, key) => {
+                    {   dropdownList.map((prop, key) => {
                       if (prop.divider) {
                         return (
                           <Divider

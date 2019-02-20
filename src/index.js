@@ -11,7 +11,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloProvider } from 'react-apollo';
 import { setContext } from "apollo-link-context";
 import WorkSpace from '../src/views/Workspace/Workspace';
-
+import UserProfile from './components/UserProfile/UserProfile';
 import "assets/scss/material-kit-react.css?v=1.2.0";
 
 import Amplify from "aws-amplify";
@@ -107,11 +107,19 @@ class App1 extends React.Component {
             authenticatedUser: null,
             authData: null,
             mode: 'guest', // guest or authencated
-            status: "guest",
             user: null
             //client: this._unauthenticated_client()
 
         };
+    }
+
+    confirmUserDeletion = () => {
+        console.log("confirmUserDeletion......");
+        this.setState({
+            authenticatedUser: null,
+            authData: null,
+            mode: "guest"
+        });
     }
 
     signInHandler = (username, password) => {
@@ -119,7 +127,7 @@ class App1 extends React.Component {
         Auth.signIn(username, password)
             .then(user => {
                 console.log("Auth.signIn is success ", user);
-                this.setState({user: user, authenticatedUser: user, authData: user.signInUserSession,status: "authenticated" ,mode: "authenticated"});
+                this.setState({user: user, authenticatedUser: user, authData: user.signInUserSession ,mode: "authenticated"});
                 //this.updateAuthenticatedUserandSession();
                 //setTimeout(() => console.log("Done"), 3000);
                 console.log("App1 signInHandler()");
@@ -132,7 +140,7 @@ class App1 extends React.Component {
 
     signOutHandler = () => {
         console.log("Clicked on Logout");
-        this.setState({ status: "guest" });
+        this.setState({ mode: "guest" });
     }
 
     updateAuthenticatedUserandSession = () => {
@@ -288,7 +296,7 @@ class App1 extends React.Component {
                                     </CustomAuthenticator>
                                     }
                                 />
-                                 <Route
+                                <Route
                                     path="/workspace"
                                     key="Workspace"
                                     render={(props) => <WorkSpace
@@ -301,6 +309,23 @@ class App1 extends React.Component {
                                     />
                                     }
                                 />
+                                <Route
+                                    path="/user/profile"
+                                    key="UserProfile"
+                                    exact
+                                    render={
+                                        (props) => <UserProfile
+                                            {...props}
+                                            {...this.state}
+                                            {...childProps}
+                                            goForward={this.signInHandler}
+                                            goBack={this.signOutHandler}
+                                            confirmUserDeletion={this.confirmUserDeletion}
+                                        />
+
+                                    }
+                                />
+
                                 <Route
                                     path="/"
                                     exact

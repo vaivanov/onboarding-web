@@ -118,7 +118,7 @@ class Onboarding extends React.Component {
 
                 <Header
                     brand={"Rookvrije generatie"}
-                    rightLinks={<HeaderLinks  {...this.props}/>}
+                    rightLinks={<HeaderLinks  {...rest}/>}
                     fixed
                     color="white"
                     changeColorOnScroll={{
@@ -160,7 +160,7 @@ class Onboarding extends React.Component {
                                     playground={playground}
                                     onBackButton={this.handlePlaygroundChange}
                                     defaultView={playground.default}
-                                    {...this.props}
+                                    {...rest}
                                 />
                             </div>
                         </GridItem>

@@ -111,7 +111,7 @@ class PlaygroundStatistics extends React.Component {
                                     <PlaygroundStatistic playground={playground} name={playground.name} stat={"votes"}/>
                                 </div>
                                 <div style={{display: generalStatistics ? 'block' : 'none'}}>
-                                    <FormDialog playgrounds={playgrounds} {...this.props}/>
+                                    <FormDialog playgrounds={playgrounds}/>
                                 </div>
                                 <div style={{display: generalStatistics ? 'none' : 'block'}}>
                                     <JoinInitiative playground={playground}/>

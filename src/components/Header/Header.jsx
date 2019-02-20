@@ -121,6 +121,7 @@ class Header extends React.Component {
             <span>Sign In</span>
           </Button>;
         } else {
+          console.log("Authenticated User" ,this.props.authenticatedUser,this.props.authenticatedUser);
           signInButton = <h6>Hi, { this.props.authenticatedUser ? this.props.authenticatedUser.username: null} </h6>;
         }
 

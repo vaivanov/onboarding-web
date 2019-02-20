@@ -123,7 +123,7 @@ const App = class App extends React.Component {
             return {
                 ...headers,
                 headers: {
-                    Authorization: `Bearer ${jwtToken ? jwtToken: 'dsf.sdf.sdf'}`
+                    Authorization: `Bearer ${jwtToken}`
                 },
             };
         });

@@ -48,9 +48,8 @@ function HeaderLinks({...props}) {
                     }}
                     buttonIcon={AccountCircle}
                     dropdownList={[
-                        props.mode !== "guest" ? <JSignOut {...props}/> :  <Link to="/login" className={classes.dropdownLink}>
-                        Guest
-                    </Link>
+                        props.mode !== "guest" ? <JSignOut {...props}/> :  <Link to="/login" className={classes.dropdownLink}>Guest</Link>,
+                        props.mode !== "guest" ? <Link to="/user/profile" className={classes.dropdownLink}>Profile</Link> : null
                     ]}
                 />
 
